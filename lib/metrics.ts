@@ -14,7 +14,6 @@ import { parseSheetDate, isDateInRange } from '@/lib/dates';
 export const STAFF_MEMBERS = [
   'Alexandra Khan',
   'Ksenia Stepankina',
-  'Jacob Davenport',
   'Caleb Raney',
   'Dal Ndzishangong',
   'Sam',

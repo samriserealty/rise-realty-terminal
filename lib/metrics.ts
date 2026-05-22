@@ -166,8 +166,8 @@ export function computeMetrics(
       p.contractsSigned++;
     }
 
-    if (opp.Last_Offer_Made__c) {
-      // Last_Offer_Made__c is a date field; it was populated this week if the opp appeared in our query
+    if (opp.Left_Main__Last_Offer_Made__c) {
+      // Left_Main__Last_Offer_Made__c is a date field; it was populated this week if the opp appeared in our query
       p.offersMade++;
     }
   }
@@ -182,17 +182,17 @@ export function computeMetrics(
   // --- TRANSACTIONS (this week's closing) ---
   for (const tx of sfData.transactions) {
     // Dispo assists: dispositions rep set and closing this week
-    if (tx.Dispositions_Rep__c) {
-      const owner = matchStaffName(tx.Dispositions_Rep__c);
+    if (tx.Left_Main__Dispositions_Rep__c) {
+      const owner = matchStaffName(tx.Left_Main__Dispositions_Rep__c);
       if (owner && people.has(owner)) {
         people.get(owner)!.dispoAssistsCompleted++;
       }
     }
 
     // Deals matched to buyers: assigned_buyer_contact populated this week
-    if (tx.Assigned_Buyer_Contact__c) {
+    if (tx.Left_Main__Assigned_Buyer__c) {
       // Attribute to acquisition rep if available, else dispo rep
-      const rawRep = tx.Acquisition_Rep__c || tx.Dispositions_Rep__c;
+      const rawRep = tx.Left_Main__Acquisition_Rep__c || tx.Left_Main__Dispositions_Rep__c;
       const owner = matchStaffName(rawRep);
       if (owner && people.has(owner)) {
         people.get(owner)!.dealsMatchedToBuyers++;
@@ -200,20 +200,20 @@ export function computeMetrics(
     }
 
     // Revenue for Sam and Caleb
-    if (tx.Actual_Final_Spread__c != null) {
-      const acqOwner = matchStaffName(tx.Acquisition_Rep__c);
+    if (tx.Spread__c != null) {
+      const acqOwner = matchStaffName(tx.Left_Main__Acquisition_Rep__c);
       if (acqOwner && REVENUE_STAFF.includes(acqOwner)) {
-        people.get(acqOwner)!.revenueClosedThisWeek += tx.Actual_Final_Spread__c;
+        people.get(acqOwner)!.revenueClosedThisWeek += tx.Spread__c;
       }
     }
   }
 
   // --- ACTIVE PIPELINE REVENUE ---
   for (const tx of sfData.allActiveTransactions) {
-    if (tx.Projected_Wholesale_Profit__c != null) {
-      const acqOwner = matchStaffName(tx.Acquisition_Rep__c);
+    if (tx.Projected_Spread__c != null) {
+      const acqOwner = matchStaffName(tx.Left_Main__Acquisition_Rep__c);
       if (acqOwner && REVENUE_STAFF.includes(acqOwner)) {
-        people.get(acqOwner)!.revenueInActivePipeline += tx.Projected_Wholesale_Profit__c;
+        people.get(acqOwner)!.revenueInActivePipeline += tx.Projected_Spread__c;
       }
     }
   }

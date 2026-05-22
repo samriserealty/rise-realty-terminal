@@ -8,11 +8,10 @@ import {
 import { WeekRange } from '@/types';
 import { getDormantThreshold } from '@/lib/dates';
 
-// NOTE: The Transaction object API name must be verified against the actual Salesforce schema.
-// LeftMain REI may use "LeftMain__Transaction__c" instead of "Transaction__c".
-// Check via: Setup > Object Manager > search "Transaction" or run a describe call.
-// The code below tries both names and gracefully logs errors if neither works.
-const TRANSACTION_API_NAMES = ['Transaction__c', 'LeftMain__Transaction__c'];
+// NOTE: Verified object API name is Left_Main__Transactions__c (confirmed via Object Manager).
+// If queries fail, re-check via: Setup > Object Manager > search "Transactions".
+// The code retries through TRANSACTION_API_NAMES and logs errors gracefully if none match.
+const TRANSACTION_API_NAMES = ['Left_Main__Transactions__c'];
 
 interface TokenResponse {
   access_token: string;
@@ -123,7 +122,7 @@ export async function fetchSalesforceData(week: WeekRange): Promise<{
     soqlQuery<SalesforceTask>(
       token,
       instanceUrl,
-      `SELECT Id, WhoId, WhatId, OwnerId, Owner.Name, Subject, ActivityDate, Type, Status, Description
+      `SELECT Id, WhoId, WhatId, OwnerId, Owner.Name, Subject, ActivityDate, Status, Description
        FROM Task
        WHERE ActivityDate >= ${week.startDate} AND ActivityDate <= ${week.endDate}`
     ),
@@ -133,7 +132,7 @@ export async function fetchSalesforceData(week: WeekRange): Promise<{
       token,
       instanceUrl,
       `SELECT Id, Name, OwnerId, Owner.Name, StageName, CreatedDate, CloseDate,
-              Last_Offer_Made__c, Buy_Price__c, Who_Set_the_Appt__c
+              Left_Main__Last_Offer_Made__c, Buy_Price__c, Who_Set_the_Appt__c
        FROM Opportunity
        WHERE CreatedDate >= ${week.startISO} AND CreatedDate <= ${week.endISO}`
     ),
@@ -143,7 +142,7 @@ export async function fetchSalesforceData(week: WeekRange): Promise<{
       token,
       instanceUrl,
       `SELECT Id, Name, OwnerId, Owner.Name, StageName, CreatedDate, CloseDate,
-              Last_Offer_Made__c, Buy_Price__c, Who_Set_the_Appt__c
+              Left_Main__Last_Offer_Made__c, Buy_Price__c, Who_Set_the_Appt__c
        FROM Opportunity
        WHERE StageName = 'Contract Signed'
          AND LastModifiedDate >= ${week.startISO}
@@ -233,11 +232,11 @@ export async function fetchSalesforceData(week: WeekRange): Promise<{
     token,
     instanceUrl,
     (obj) =>
-      `SELECT Id, Name, Acquisition_Rep__c, Dispositions_Rep__c,
-              Actual_Final_Spread__c, Projected_Wholesale_Profit__c,
-              Assigned_Buyer_Contact__c, Closing_Date__c, CreatedDate
+      `SELECT Id, Name, Left_Main__Acquisition_Rep__c, Left_Main__Dispositions_Rep__c,
+              Spread__c, Projected_Spread__c,
+              Left_Main__Assigned_Buyer__c, Left_Main__Closing_Date__c, CreatedDate
        FROM ${obj}
-       WHERE Closing_Date__c >= ${week.startDate} AND Closing_Date__c <= ${week.endDate}`
+       WHERE Left_Main__Closing_Date__c >= ${week.startDate} AND Left_Main__Closing_Date__c <= ${week.endDate}`
   );
   if (txWeekResult.error) errors.push(txWeekResult.error);
 
@@ -245,11 +244,11 @@ export async function fetchSalesforceData(week: WeekRange): Promise<{
     token,
     instanceUrl,
     (obj) =>
-      `SELECT Id, Name, Acquisition_Rep__c, Dispositions_Rep__c,
-              Actual_Final_Spread__c, Projected_Wholesale_Profit__c,
-              Assigned_Buyer_Contact__c, Closing_Date__c, CreatedDate
+      `SELECT Id, Name, Left_Main__Acquisition_Rep__c, Left_Main__Dispositions_Rep__c,
+              Spread__c, Projected_Spread__c,
+              Left_Main__Assigned_Buyer__c, Left_Main__Closing_Date__c, CreatedDate
        FROM ${obj}
-       WHERE Closing_Date__c = null OR Closing_Date__c >= TODAY`
+       WHERE Left_Main__Closing_Date__c = null OR Left_Main__Closing_Date__c >= TODAY`
   );
 
   return {

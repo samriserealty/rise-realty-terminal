@@ -75,7 +75,7 @@ export interface SalesforceOpportunity {
   StageName: string;
   CreatedDate: string;
   CloseDate?: string;
-  Last_Offer_Made__c?: string;
+  Left_Main__Last_Offer_Made__c?: string;
   Buy_Price__c?: number;
   Who_Set_the_Appt__c?: string;
 }
@@ -92,12 +92,12 @@ export interface SalesforceContact {
 export interface SalesforceTransaction {
   Id: string;
   Name: string;
-  Acquisition_Rep__c?: string;
-  Dispositions_Rep__c?: string;
-  Actual_Final_Spread__c?: number;
-  Projected_Wholesale_Profit__c?: number;
-  Assigned_Buyer_Contact__c?: string;
-  Closing_Date__c?: string;
+  Left_Main__Acquisition_Rep__c?: string;
+  Left_Main__Dispositions_Rep__c?: string;
+  Spread__c?: number;
+  Projected_Spread__c?: number;
+  Left_Main__Assigned_Buyer__c?: string;
+  Left_Main__Closing_Date__c?: string;
   CreatedDate: string;
 }
 

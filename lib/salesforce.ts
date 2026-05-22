@@ -233,7 +233,7 @@ export async function fetchSalesforceData(week: WeekRange): Promise<{
     instanceUrl,
     (obj) =>
       `SELECT Id, Name, Left_Main__Acquisition_Rep__c, Left_Main__Dispositions_Rep__c,
-              Spread__c, Projected_Spread__c,
+              Spread__c,
               Left_Main__Assigned_Buyer__c, Left_Main__Closing_Date__c, CreatedDate
        FROM ${obj}
        WHERE Left_Main__Closing_Date__c >= ${week.startDate} AND Left_Main__Closing_Date__c <= ${week.endDate}`
@@ -245,7 +245,7 @@ export async function fetchSalesforceData(week: WeekRange): Promise<{
     instanceUrl,
     (obj) =>
       `SELECT Id, Name, Left_Main__Acquisition_Rep__c, Left_Main__Dispositions_Rep__c,
-              Spread__c, Projected_Spread__c,
+              Spread__c,
               Left_Main__Assigned_Buyer__c, Left_Main__Closing_Date__c, CreatedDate
        FROM ${obj}
        WHERE Left_Main__Closing_Date__c = null OR Left_Main__Closing_Date__c >= TODAY`

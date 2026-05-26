@@ -16,7 +16,16 @@ export const STAFF_MEMBERS = [
   'Ksenia Stepankina',
   'Dal Ndzishangong',
   'Sam',
+  'Colby White',
 ];
+
+// Full staff who only track Google Sheets contacts (no Salesforce metrics).
+// Gold avatar like regular staff — not interns.
+const CONTACTS_ONLY_STAFF = ['Colby White'];
+
+export function isContactsOnly(name: string): boolean {
+  return CONTACTS_ONLY_STAFF.includes(name);
+}
 
 // Interns only track Realtor Contacts and Investor Contacts (Google Sheets).
 // They do not appear in Salesforce queries and have no acquisition/dispo/revenue metrics.

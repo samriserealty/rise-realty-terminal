@@ -2,7 +2,7 @@
 
 import MetricItem from './MetricItem';
 import { PersonMetrics } from '@/types';
-import { hasRevenueMetrics, isIntern } from '@/lib/metrics';
+import { hasRevenueMetrics, isIntern, isContactsOnly } from '@/lib/metrics';
 
 type Tab = 'acquisitions' | 'dispo' | 'contacts';
 
@@ -16,6 +16,7 @@ interface PersonCardProps {
 export default function PersonCard({ person, tab, previousPerson, showComparison = false }: PersonCardProps) {
   const showRevenue = hasRevenueMetrics(person.name);
   const intern = isIntern(person.name);
+  const contactsOnly = isContactsOnly(person.name);
   const cmp = showComparison && previousPerson ? previousPerson : undefined;
 
   const initials = person.name
@@ -35,11 +36,12 @@ export default function PersonCard({ person, tab, previousPerson, showComparison
         <div>
           <h3 className="font-bold text-white text-base leading-tight">{person.name}</h3>
           {intern && <span className="text-white/40 text-xs">Intern · Contacts only</span>}
+          {contactsOnly && <span className="text-white/40 text-xs">Contacts only</span>}
         </div>
       </div>
 
-      {/* Interns: always show only contacts metrics regardless of active tab */}
-      {intern ? (
+      {/* Interns and contacts-only staff: always show only contacts metrics */}
+      {(intern || contactsOnly) ? (
         <>
           <MetricItem label="Realtor Contacts" value={person.realtorContactsLogged} previousValue={cmp?.realtorContactsLogged} showComparison={showComparison} />
           <MetricItem label="Investor Contacts" value={person.investorContactsLogged} previousValue={cmp?.investorContactsLogged} showComparison={showComparison} />

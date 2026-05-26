@@ -7,35 +7,51 @@ function toDateStr(date: Date): string {
 export function getWeekRange(date: Date = new Date()): WeekRange {
   const d = new Date(date);
   const day = d.getDay(); // 0 = Sunday
-  const diffToMonday = day === 0 ? -6 : 1 - day;
 
-  const monday = new Date(d);
-  monday.setDate(d.getDate() + diffToMonday);
-  monday.setHours(0, 0, 0, 0);
+  // Weeks run Sunday–Saturday
+  const sunday = new Date(d);
+  sunday.setDate(d.getDate() - day);
+  sunday.setHours(0, 0, 0, 0);
 
-  const sunday = new Date(monday);
-  sunday.setDate(monday.getDate() + 6);
-  sunday.setHours(23, 59, 59, 999);
+  const saturday = new Date(sunday);
+  saturday.setDate(sunday.getDate() + 6);
+  saturday.setHours(23, 59, 59, 999);
 
   return {
-    start: monday,
-    end: sunday,
-    startISO: monday.toISOString(),
-    endISO: sunday.toISOString(),
-    startDate: toDateStr(monday),
-    endDate: toDateStr(sunday),
+    start: sunday,
+    end: saturday,
+    startISO: sunday.toISOString(),
+    endISO: saturday.toISOString(),
+    startDate: toDateStr(sunday),
+    endDate: toDateStr(saturday),
   };
 }
 
 export function getPreviousWeekRange(date: Date = new Date()): WeekRange {
   const current = getWeekRange(date);
-  const prevMonday = new Date(current.start);
-  prevMonday.setDate(prevMonday.getDate() - 7);
-  return getWeekRange(prevMonday);
+  const prevSunday = new Date(current.start);
+  prevSunday.setDate(prevSunday.getDate() - 7);
+  return getWeekRange(prevSunday);
 }
 
-export function isMonday(date: Date = new Date()): boolean {
-  return date.getDay() === 1;
+// Returns true on Sunday — the first day of the Sun–Sat week.
+// Used to decide whether to show last-week comparison on the dashboard.
+export function isSunday(date: Date = new Date()): boolean {
+  return date.getDay() === 0;
+}
+
+// Build a WeekRange from arbitrary YYYY-MM-DD strings (for custom date range queries).
+export function buildRangeFromDates(startDate: string, endDate: string): WeekRange {
+  const start = new Date(startDate + 'T00:00:00');
+  const end = new Date(endDate + 'T23:59:59.999');
+  return {
+    start,
+    end,
+    startISO: start.toISOString(),
+    endISO: end.toISOString(),
+    startDate,
+    endDate,
+  };
 }
 
 export function formatLastUpdated(date: Date): string {

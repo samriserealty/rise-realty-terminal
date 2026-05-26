@@ -18,6 +18,22 @@ export const STAFF_MEMBERS = [
   'Sam',
 ];
 
+// Interns only track Realtor Contacts and Investor Contacts (Google Sheets).
+// They do not appear in Salesforce queries and have no acquisition/dispo/revenue metrics.
+export const INTERN_MEMBERS = [
+  'Caroline Chill',
+  'Dunia De La Rosa',
+  'Jalyn Stevenson',
+  'Tatum Watts',
+];
+
+// Combined list used for name matching across all data sources
+const ALL_STAFF = [...STAFF_MEMBERS, ...INTERN_MEMBERS];
+
+export function isIntern(name: string): boolean {
+  return INTERN_MEMBERS.includes(name);
+}
+
 // Staff whose revenue metrics should be shown
 const REVENUE_STAFF = ['Caleb Raney', 'Sam'];
 
@@ -48,7 +64,7 @@ function emptyPerson(name: string): PersonMetrics {
 function matchStaffName(rawName: string | undefined): string | null {
   if (!rawName) return null;
   const normalized = rawName.trim().toLowerCase();
-  for (const staff of STAFF_MEMBERS) {
+  for (const staff of ALL_STAFF) {
     if (
       normalized === staff.toLowerCase() ||
       normalized.startsWith(staff.toLowerCase().split(' ')[0]) ||
@@ -108,8 +124,8 @@ export function computeMetrics(
 ): PersonMetrics[] {
   const people = new Map<string, PersonMetrics>();
 
-  // Initialize all staff with zeroed metrics
-  for (const name of STAFF_MEMBERS) {
+  // Initialize all staff (including interns) with zeroed metrics
+  for (const name of ALL_STAFF) {
     people.set(name, emptyPerson(name));
   }
 

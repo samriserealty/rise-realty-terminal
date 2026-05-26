@@ -1,7 +1,7 @@
 import { DashboardData } from '@/types';
 import Dashboard from '@/components/Dashboard';
 import { computeMetrics, computeSummary } from '@/lib/metrics';
-import { getWeekRange, isMonday, formatLastUpdated } from '@/lib/dates';
+import { getWeekRange, isSunday, formatLastUpdated } from '@/lib/dates';
 import { fetchSalesforceData } from '@/lib/salesforce';
 import { fetchSheetsData } from '@/lib/sheets';
 
@@ -44,7 +44,7 @@ async function getDashboardData(): Promise<DashboardData> {
     lastUpdated: formatLastUpdated(new Date()),
     weekStart: week.startISO,
     weekEnd: week.endISO,
-    isMonday: isMonday(),
+    isMonday: isSunday(),
     errors: allErrors,
   };
 }

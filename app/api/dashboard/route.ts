@@ -1,16 +1,28 @@
-import { NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 import { fetchSalesforceData } from '@/lib/salesforce';
 import { fetchSheetsData } from '@/lib/sheets';
 import { computeMetrics, computeSummary } from '@/lib/metrics';
-import { getWeekRange, getPreviousWeekRange, isMonday, formatLastUpdated } from '@/lib/dates';
+import {
+  getWeekRange,
+  getPreviousWeekRange,
+  isSunday,
+  buildRangeFromDates,
+  formatLastUpdated,
+} from '@/lib/dates';
 import { DashboardData } from '@/types';
 
 export const dynamic = 'force-dynamic';
 
-async function buildDashboard(): Promise<DashboardData> {
-  const week = getWeekRange();
+async function buildDashboard(startDate?: string, endDate?: string): Promise<DashboardData> {
+  // Use custom range if both params provided, otherwise default to current Sun–Sat week
+  const isDefaultRange = !startDate || !endDate;
+  const week = isDefaultRange
+    ? getWeekRange()
+    : buildRangeFromDates(startDate, endDate);
+
   const allErrors: string[] = [];
-  const monday = isMonday();
+  // Only show previous-week comparison on default range when it is a Sunday
+  const showComparison = isDefaultRange && isSunday();
 
   const [sfResult, sheetsResult] = await Promise.all([
     fetchSalesforceData(week),
@@ -25,7 +37,7 @@ async function buildDashboard(): Promise<DashboardData> {
 
   let previousWeek: DashboardData['previousWeek'] = undefined;
 
-  if (monday) {
+  if (showComparison) {
     const prevWeek = getPreviousWeekRange();
     const [prevSf, prevSheets] = await Promise.all([
       fetchSalesforceData(prevWeek),
@@ -42,15 +54,18 @@ async function buildDashboard(): Promise<DashboardData> {
     lastUpdated: formatLastUpdated(new Date()),
     weekStart: week.startISO,
     weekEnd: week.endISO,
-    isMonday: monday,
+    isMonday: showComparison,
     previousWeek,
     errors: allErrors,
   };
 }
 
-export async function GET() {
+export async function GET(request: NextRequest) {
   try {
-    const data = await buildDashboard();
+    const { searchParams } = new URL(request.url);
+    const startDate = searchParams.get('startDate') ?? undefined;
+    const endDate = searchParams.get('endDate') ?? undefined;
+    const data = await buildDashboard(startDate, endDate);
     return NextResponse.json(data, {
       headers: { 'Cache-Control': 's-maxage=3600, stale-while-revalidate=60' },
     });
